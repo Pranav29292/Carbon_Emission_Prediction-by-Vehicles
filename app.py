@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import pickle
+import joblib
 import matplotlib.pyplot as plt
 import warnings
 
@@ -18,11 +18,10 @@ st.set_page_config(
 # =================================================
 # LOAD TRAINED ML MODEL
 # =================================================
-with open("vehicle_co2_model.pkl", "rb") as f:
-    model = pickle.load(f)
+model = joblib.load("vehicle_co2_model.pkl")
 
 # =================================================
-# FUEL ADJUSTMENT FACTORS (NO RETRAIN)
+# FUEL ADJUSTMENT FACTORS
 # =================================================
 FUEL_ADJUSTMENT = {
     "Petrol": 1.00,
@@ -69,29 +68,46 @@ if st.session_state.page == "input":
     st.subheader("Step 1: Enter Vehicle Details")
 
     vehicle_type = st.selectbox(
-        "Vehicle Type", ["Electric (EV)", "Petrol", "Diesel", "CNG"]
+        "Vehicle Type",
+        ["Electric (EV)", "Petrol", "Diesel", "CNG"]
     )
 
-    distance = st.number_input("Distance Travelled (km)", value=20.0)
+    distance = st.number_input(
+        "Distance Travelled (km)",
+        min_value=1.0,
+        value=20.0
+    )
 
     st.session_state.vehicle_type = vehicle_type
     st.session_state.distance = distance
 
     if vehicle_type == "Electric (EV)":
         energy_consumption = st.number_input(
-            "Energy Consumption (kWh / 100 km)", value=6.0
+            "Energy Consumption (kWh / 100 km)",
+            min_value=0.1,
+            value=6.0
         )
         grid_emission = st.number_input(
-            "Grid Emission Factor (g CO₂ / kWh)", value=700.0
+            "Grid Emission Factor (g CO₂ / kWh)",
+            min_value=0.1,
+            value=700.0
         )
+
         st.session_state.energy_consumption = energy_consumption
         st.session_state.grid_emission = grid_emission
 
     else:
-        engine_size = st.number_input("Engine Size (Litres)", value=2.0)
-        fuel_consumption = st.number_input(
-            "Fuel Consumption (L / 100 km)", value=8.0
+        engine_size = st.number_input(
+            "Engine Size (Litres)",
+            min_value=0.1,
+            value=2.0
         )
+        fuel_consumption = st.number_input(
+            "Fuel Consumption (L / 100 km)",
+            min_value=0.1,
+            value=8.0
+        )
+
         st.session_state.engine_size = engine_size
         st.session_state.fuel_consumption = fuel_consumption
 
@@ -126,7 +142,6 @@ elif st.session_state.page == "output":
         st.info(f"Total CO₂ for {distance:.2f} km: {total_co2:.2f} kg")
         st.info(f"Emission Status: {co2_status(final_co2)}")
 
-        # 🔹 Dynamic comparison values
         ice_val = 160
         hybrid_val = final_co2 * 0.6
         ev_val = final_co2
@@ -154,7 +169,7 @@ elif st.session_state.page == "output":
         ev_val = 0
 
     # =================================================
-    # COMPARISON DATA (FIXED FOR EV)
+    # COMPARISON TABLE
     # =================================================
     comparison_df = pd.DataFrame({
         "Vehicle Type": ["ICE Vehicle", "Hybrid Vehicle", "Electric Vehicle"],
@@ -176,6 +191,7 @@ elif st.session_state.page == "output":
     plt.ylabel("CO₂ Emissions (g/km)")
     plt.title("CO₂ Emission Comparison")
     st.pyplot(plt)
+    plt.close()
 
     # =================================================
     # LINE GRAPH
@@ -190,6 +206,7 @@ elif st.session_state.page == "output":
     plt.legend()
     plt.grid(True)
     st.pyplot(plt)
+    plt.close()
 
     # =================================================
     # RECOMMENDATION
@@ -218,6 +235,3 @@ elif st.session_state.page == "output":
     if st.button("⬅ Back to Input Page"):
         st.session_state.page = "input"
         st.rerun()
-
-
-
