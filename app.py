@@ -18,7 +18,7 @@ st.set_page_config(
 # =================================================
 # LOAD TRAINED ML MODEL
 # =================================================
-with open("vehicle_co2_model(1).pkl", "rb") as f:
+with open("vehicle_co2_model.pkl", "rb") as f:
     model = pickle.load(f)
 
 # =================================================
