@@ -112,7 +112,7 @@ if st.session_state.page == "input":
         if category == "Two-Wheeler":
 
             model_type = st.selectbox(
-                "Two-Wheeler Model Type",
+                "Two-Wheeler Type",
                 ["Commuter", "Cruiser", "Sports", "Scooter"]
             )
 
