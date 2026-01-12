@@ -6,17 +6,6 @@ This project predicts CO₂ emissions from vehicles using Machine Learning and c
 ## 🎯 Objectives
 - Predict CO₂ emissions for ICE vehicles  
 - Compare emissions with Hybrid and Electric Vehicles  
-- Recommend the best low-emission vehicle option  
-
-## 📊 Dataset
-- 30,000+ records  
-- Features:  
-  - Engine Size (L)  
-  - Fuel Consumption (L/100 km)  
-- Target:  
-  - CO₂ Emissions (g/km)  
-- Machine Learning is applied only to ICE vehicles  
-- EV emissions are calculated analytically  
 
 ## 🤖 Models Used
 - Linear Regression  
