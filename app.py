@@ -68,7 +68,7 @@ if st.session_state.page == "input":
 
     vehicle_type = st.selectbox(
         "Vehicle Type",
-        ["Petrol", "Diesel", "CNG","Electric (EV)",]
+        ["Petrol", "Diesel", "CNG","Electric (EV)"]
     )
 
     distance = st.number_input(
