@@ -120,16 +120,16 @@ if st.session_state.page == "input":
 
         model_type = st.selectbox(
             "Vehicle Category",
-            ["Bike", "Hatchback", "Sedan", "SUV"]
+            ["Two-Wheeler", "Hatchback", "Sedan", "SUV"]
         )
 
         # -------------------------------
         # BIKE MODELS
         # -------------------------------
-        if model_type == "Bike":
+        if model_type == "Two-Wheeler":
 
             bike_type = st.selectbox(
-                "Bike Model Type",
+                "Two-Wheeler Model Type",
                 ["Commuter", "Cruiser", "Sports", "Scooter"]
             )
 
