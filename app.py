@@ -104,41 +104,53 @@ if st.session_state.page == "input":
     # ICE / CNG VEHICLE INPUT
     # ===============================
     else:
-        st.subheader("Vehicle Engine Details")
+        st.subheader("Vehicle Engine & Fuel Details")
 
         model_type = st.selectbox(
             "Vehicle Model Type",
-            ["Hatchback", "Sedan", "SUV"],
-            help="Select vehicle category if engine size is unknown"
+            ["Bike", "Hatchback", "Sedan", "SUV"],
+            help="Select vehicle category if exact values are unknown"
         )
 
-        # Engine size ranges in LITRES
-        engine_ranges_litre = {
+        # Engine size ranges (litres)
+        engine_ranges = {
+            "Bike": (0.10, 0.50),
             "Hatchback": (0.8, 1.2),
             "Sedan": (1.2, 1.8),
             "SUV": (1.8, 3.0)
         }
 
-        min_l, max_l = engine_ranges_litre[model_type]
+        # Fuel consumption ranges (L/100 km)
+        fuel_ranges = {
+            "Bike": (2.0, 3.5),
+            "Hatchback": (4.0, 6.0),
+            "Sedan": (5.0, 8.0),
+            "SUV": (7.0, 12.0)
+        }
+
+        min_eng, max_eng = engine_ranges[model_type]
+        min_fc, max_fc = fuel_ranges[model_type]
 
         st.info(
-            f"Typical engine size range for {model_type}: "
-            f"{min_l} L – {max_l} L"
+            f"{model_type} typical ranges → "
+            f"Engine: {min_eng}–{max_eng} L | "
+            f"Fuel Consumption: {min_fc}–{max_fc} L/100 km"
         )
 
         engine_size = st.slider(
-            "Engine Size (in litres)",
-            min_value=min_l,
-            max_value=max_l,
-            value=round((min_l + max_l) / 2, 1),
-            step=0.1
+            "Engine Size (litres)",
+            min_value=min_eng,
+            max_value=max_eng,
+            value=round((min_eng + max_eng) / 2, 2),
+            step=0.01 if model_type == "Bike" else 0.1
         )
 
-        fuel_consumption = st.number_input(
+        fuel_consumption = st.slider(
             "Fuel Consumption (L / 100 km)",
-            min_value=0.1,
-            value=8.0,
-            help="Available in RC book or manufacturer brochure"
+            min_value=min_fc,
+            max_value=max_fc,
+            value=round((min_fc + max_fc) / 2, 1),
+            step=0.1
         )
 
         st.session_state.engine_size = engine_size
@@ -217,10 +229,8 @@ elif st.session_state.page == "output":
     # BAR GRAPH
     # ===============================
     plt.figure(figsize=(8, 4))
-    plt.bar(
-        comparison_df["Vehicle Type"],
-        comparison_df["CO₂ Emissions (g/km)"]
-    )
+    plt.bar(comparison_df["Vehicle Type"],
+            comparison_df["CO₂ Emissions (g/km)"])
     plt.xlabel("Vehicle Type")
     plt.ylabel("CO₂ Emissions (g/km)")
     plt.title("CO₂ Emission Comparison")
@@ -270,4 +280,6 @@ elif st.session_state.page == "output":
     if st.button("⬅ Back to Input Page"):
         st.session_state.page = "input"
         st.rerun()
+
+    
 
