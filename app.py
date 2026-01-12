@@ -112,28 +112,27 @@ if st.session_state.page == "input":
             help="Select vehicle category if engine size is unknown"
         )
 
-        engine_ranges = {
-            "Hatchback": (800, 1200),
-            "Sedan": (1200, 1800),
-            "SUV": (1800, 3000)
+        # Engine size ranges in LITRES
+        engine_ranges_litre = {
+            "Hatchback": (0.8, 1.2),
+            "Sedan": (1.2, 1.8),
+            "SUV": (1.8, 3.0)
         }
 
-        min_cc, max_cc = engine_ranges[model_type]
+        min_l, max_l = engine_ranges_litre[model_type]
 
         st.info(
-            f"Typical engine capacity range for {model_type}: "
-            f"{min_cc} cc – {max_cc} cc"
+            f"Typical engine size range for {model_type}: "
+            f"{min_l} L – {max_l} L"
         )
 
-        engine_cc = st.slider(
-            "Engine Capacity (in cc)",
-            min_value=min_cc,
-            max_value=max_cc,
-            value=(min_cc + max_cc) // 2,
-            step=100
+        engine_size = st.slider(
+            "Engine Size (in litres)",
+            min_value=min_l,
+            max_value=max_l,
+            value=round((min_l + max_l) / 2, 1),
+            step=0.1
         )
-
-        engine_size = engine_cc / 1000  # CC → Liters
 
         fuel_consumption = st.number_input(
             "Fuel Consumption (L / 100 km)",
