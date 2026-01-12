@@ -79,7 +79,7 @@ if st.session_state.page == "input":
 
     else:
         engine_size = st.number_input(
-            "Engine Size (cc)",
+            "Engine Size (Litre)",
             min_value=0.1,
             value=2.0
         )
