@@ -81,20 +81,32 @@ if st.session_state.page == "input":
     st.session_state.distance = distance
 
     # ===============================
-    # ELECTRIC VEHICLE INPUT
+    # ELECTRIC VEHICLE INPUT (WITH RANGES)
     # ===============================
     if vehicle_type == "Electric (EV)":
 
-        energy_consumption = st.number_input(
-            "Energy Consumption (kWh / 100 km)",
-            min_value=0.1,
-            value=6.0
+        st.subheader("Electric Vehicle Energy Details")
+
+        st.info(
+            "Typical EV ranges → "
+            "Energy Consumption: 10–25 kWh/100 km | "
+            "Grid Emission: 300–900 g CO₂/kWh"
         )
 
-        grid_emission = st.number_input(
+        energy_consumption = st.slider(
+            "Energy Consumption (kWh / 100 km)",
+            min_value=10.0,
+            max_value=25.0,
+            value=15.0,
+            step=0.5
+        )
+
+        grid_emission = st.slider(
             "Grid Emission Factor (g CO₂ / kWh)",
-            min_value=0.1,
-            value=700.0
+            min_value=300.0,
+            max_value=900.0,
+            value=700.0,
+            step=10.0
         )
 
         st.session_state.energy_consumption = energy_consumption
@@ -107,55 +119,90 @@ if st.session_state.page == "input":
         st.subheader("Vehicle Engine & Fuel Details")
 
         model_type = st.selectbox(
-            "Vehicle Model Type",
-            ["Bike", "Hatchback", "Sedan", "SUV"],
-            help="Select vehicle category if exact values are unknown"
+            "Vehicle Category",
+            ["Bike", "Hatchback", "Sedan", "SUV"]
         )
 
-        # Engine size ranges (litres)
-        engine_ranges = {
-            "Bike": (0.10, 0.50),
-            "Hatchback": (0.8, 1.2),
-            "Sedan": (1.2, 1.8),
-            "SUV": (1.8, 3.0)
-        }
+        # -------------------------------
+        # BIKE SUB-MODELS
+        # -------------------------------
+        if model_type == "Bike":
 
-        # Fuel consumption ranges (L/100 km)
-        fuel_ranges = {
-            "Bike": (2.0, 3.5),
-            "Hatchback": (4.0, 6.0),
-            "Sedan": (5.0, 8.0),
-            "SUV": (7.0, 12.0)
-        }
+            bike_type = st.selectbox(
+                "Bike Model Type",
+                ["Commuter", "Cruiser", "Sports", "Scooter"]
+            )
 
-        min_eng, max_eng = engine_ranges[model_type]
-        min_fc, max_fc = fuel_ranges[model_type]
+            bike_engine_ranges = {
+                "Commuter": (0.10, 0.15),
+                "Cruiser": (0.25, 0.50),
+                "Sports": (0.20, 0.40),
+                "Scooter": (0.10, 0.13)
+            }
 
-        st.info(
-            f"{model_type} typical ranges → "
-            f"Engine: {min_eng}–{max_eng} L | "
-            f"Fuel Consumption: {min_fc}–{max_fc} L/100 km"
-        )
+            bike_fuel_ranges = {
+                "Commuter": (2.0, 3.0),
+                "Cruiser": (3.5, 5.0),
+                "Sports": (3.0, 4.5),
+                "Scooter": (1.8, 2.5)
+            }
 
-        engine_size = st.slider(
-            "Engine Size (litres)",
-            min_value=min_eng,
-            max_value=max_eng,
-            value=round((min_eng + max_eng) / 2, 2),
-            step=0.01 if model_type == "Bike" else 0.1
-        )
+            min_eng, max_eng = bike_engine_ranges[bike_type]
+            min_fc, max_fc = bike_fuel_ranges[bike_type]
 
-        fuel_consumption = st.slider(
-            "Fuel Consumption (L / 100 km)",
-            min_value=min_fc,
-            max_value=max_fc,
-            value=round((min_fc + max_fc) / 2, 1),
-            step=0.1
-        )
+            engine_size = st.slider(
+                "Engine Size (litres)",
+                min_value=min_eng,
+                max_value=max_eng,
+                value=round((min_eng + max_eng) / 2, 2),
+                step=0.01
+            )
+
+            fuel_consumption = st.slider(
+                "Fuel Consumption (L / 100 km)",
+                min_value=min_fc,
+                max_value=max_fc,
+                value=round((min_fc + max_fc) / 2, 1),
+                step=0.1
+            )
+
+        # -------------------------------
+        # CAR MODELS
+        # -------------------------------
+        else:
+            engine_ranges = {
+                "Hatchback": (0.8, 1.2),
+                "Sedan": (1.2, 1.8),
+                "SUV": (1.8, 3.0)
+            }
+
+            fuel_ranges = {
+                "Hatchback": (4.0, 6.0),
+                "Sedan": (5.0, 8.0),
+                "SUV": (7.0, 12.0)
+            }
+
+            min_eng, max_eng = engine_ranges[model_type]
+            min_fc, max_fc = fuel_ranges[model_type]
+
+            engine_size = st.slider(
+                "Engine Size (litres)",
+                min_value=min_eng,
+                max_value=max_eng,
+                value=round((min_eng + max_eng) / 2, 1),
+                step=0.1
+            )
+
+            fuel_consumption = st.slider(
+                "Fuel Consumption (L / 100 km)",
+                min_value=min_fc,
+                max_value=max_fc,
+                value=round((min_fc + max_fc) / 2, 1),
+                step=0.1
+            )
 
         st.session_state.engine_size = engine_size
         st.session_state.fuel_consumption = fuel_consumption
-        st.session_state.model_type = model_type
 
     if st.button("🔮 Predict Emissions"):
         st.session_state.page = "output"
