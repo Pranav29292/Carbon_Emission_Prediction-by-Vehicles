@@ -67,8 +67,8 @@ if st.session_state.page == "input":
     st.subheader("Step 1: Enter Vehicle Details")
 
     vehicle_type = st.selectbox(
-        "Vehicle Type",
-        ["Petrol", "Diesel", "CNG","Electric (EV)"]
+        "Fuel Type",
+        ["Petrol", "Diesel", "CNG", "Electric (EV)"]
     )
 
     distance = st.number_input(
@@ -87,26 +87,14 @@ if st.session_state.page == "input":
 
         st.subheader("Electric Vehicle Parameters")
 
-        st.info(
-            "Typical EV ranges → "
-            "Energy Consumption: 10–25 kWh/100 km | "
-            "Grid Emission Factor: 300–900 g CO₂/kWh"
-        )
-
         energy_consumption = st.slider(
             "Energy Consumption (kWh / 100 km)",
-            min_value=10.0,
-            max_value=25.0,
-            value=15.0,
-            step=0.5
+            10.0, 25.0, 15.0, 0.5
         )
 
         grid_emission = st.slider(
             "Grid Emission Factor (g CO₂ / kWh)",
-            min_value=300.0,
-            max_value=900.0,
-            value=700.0,
-            step=10.0
+            300.0, 900.0, 700.0, 10.0
         )
 
         st.session_state.energy_consumption = energy_consumption
@@ -116,17 +104,17 @@ if st.session_state.page == "input":
     # ICE / CNG VEHICLE INPUT
     # ===============================
     else:
-        st.subheader("Engine & Fuel Details")
+        st.subheader("Vehicle Category")
 
-        model_type = st.selectbox(
-            "Vehicle Category",
-            ["Two-Wheeler", "Hatchback", "Sedan", "SUV"]
+        vehicle_category = st.selectbox(
+            "Select Vehicle Category",
+            ["Two-Wheeler", "Four-Wheeler"]
         )
 
-        # -------------------------------
-        # BIKE MODELS
-        # -------------------------------
-        if model_type == "Two-Wheeler":
+        # ===============================
+        # TWO-WHEELER
+        # ===============================
+        if vehicle_category == "Two-Wheeler":
 
             bike_type = st.selectbox(
                 "Two-Wheeler Model Type",
@@ -150,69 +138,88 @@ if st.session_state.page == "input":
             min_eng, max_eng = bike_engine[bike_type]
             min_fc, max_fc = bike_fuel[bike_type]
 
-            st.info(
-                f"{bike_type} Bike → "
-                f"Engine: {min_eng}-{max_eng} L | "
-                f"Fuel: {min_fc}-{max_fc} L/100 km"
-            )
-
-            engine_size = st.slider(
-                "Engine Size (litres)",
-                min_value=min_eng,
-                max_value=max_eng,
-                value=round((min_eng + max_eng) / 2, 2),
-                step=0.01
-            )
-
-            fuel_consumption = st.slider(
-                "Fuel Consumption (L / 100 km)",
-                min_value=min_fc,
-                max_value=max_fc,
-                value=round((min_fc + max_fc) / 2, 1),
-                step=0.1
-            )
-
-        # -------------------------------
-        # CAR MODELS (FIXED RANGE DISPLAY)
-        # -------------------------------
+        # ===============================
+        # FOUR-WHEELER
+        # ===============================
         else:
-            engine_ranges = {
-                "Hatchback": (0.8, 1.2),
-                "Sedan": (1.2, 1.8),
-                "SUV": (1.8, 3.0)
-            }
-
-            fuel_ranges = {
-                "Hatchback": (4.0, 6.0),
-                "Sedan": (5.0, 8.0),
-                "SUV": (7.0, 12.0)
-            }
-
-            min_eng, max_eng = engine_ranges[model_type]
-            min_fc, max_fc = fuel_ranges[model_type]
-
-            # ✅ RANGE INFO (THIS WAS MISSING BEFORE)
-            st.info(
-                f"{model_type} typical ranges → "
-                f"Engine: {min_eng}-{max_eng} L | "
-                f"Fuel: {min_fc}-{max_fc} L/100 km"
+            car_type = st.selectbox(
+                "Four-Wheeler Type",
+                ["Hatchback", "Sedan", "SUV"]
             )
 
-            engine_size = st.slider(
-                "Engine Size (litres)",
-                min_value=min_eng,
-                max_value=max_eng,
-                value=round((min_eng + max_eng) / 2, 1),
-                step=0.1
-            )
+            if car_type == "Hatchback":
+                model_type = st.selectbox(
+                    "Hatchback Model Type",
+                    ["Entry Hatchback", "Premium Hatchback"]
+                )
 
-            fuel_consumption = st.slider(
-                "Fuel Consumption (L / 100 km)",
-                min_value=min_fc,
-                max_value=max_fc,
-                value=round((min_fc + max_fc) / 2, 1),
-                step=0.1
-            )
+                engine_range = {
+                    "Entry Hatchback": (0.8, 1.0),
+                    "Premium Hatchback": (1.0, 1.2)
+                }
+
+                fuel_range = {
+                    "Entry Hatchback": (4.0, 5.0),
+                    "Premium Hatchback": (5.0, 6.0)
+                }
+
+            elif car_type == "Sedan":
+                model_type = st.selectbox(
+                    "Sedan Model Type",
+                    ["Compact Sedan", "Mid-Size Sedan", "Luxury Sedan"]
+                )
+
+                engine_range = {
+                    "Compact Sedan": (1.2, 1.4),
+                    "Mid-Size Sedan": (1.5, 2.0),
+                    "Luxury Sedan": (2.0, 3.0)
+                }
+
+                fuel_range = {
+                    "Compact Sedan": (5.0, 6.5),
+                    "Mid-Size Sedan": (6.5, 8.0),
+                    "Luxury Sedan": (8.0, 11.0)
+                }
+
+            else:
+                model_type = st.selectbox(
+                    "SUV Model Type",
+                    ["Compact SUV", "Mid-Size SUV", "Full-Size SUV"]
+                )
+
+                engine_range = {
+                    "Compact SUV": (1.3, 1.6),
+                    "Mid-Size SUV": (1.8, 2.4),
+                    "Full-Size SUV": (2.5, 3.5)
+                }
+
+                fuel_range = {
+                    "Compact SUV": (6.0, 8.0),
+                    "Mid-Size SUV": (8.0, 11.0),
+                    "Full-Size SUV": (10.0, 14.0)
+                }
+
+            min_eng, max_eng = engine_range[model_type]
+            min_fc, max_fc = fuel_range[model_type]
+
+        st.info(
+            f"Typical Range → Engine: {min_eng}-{max_eng} L | "
+            f"Fuel: {min_fc}-{max_fc} L/100 km"
+        )
+
+        engine_size = st.slider(
+            "Engine Size (litres)",
+            min_eng, max_eng,
+            round((min_eng + max_eng) / 2, 2),
+            0.01
+        )
+
+        fuel_consumption = st.slider(
+            "Fuel Consumption (L / 100 km)",
+            min_fc, max_fc,
+            round((min_fc + max_fc) / 2, 1),
+            0.1
+        )
 
         st.session_state.engine_size = engine_size
         st.session_state.fuel_consumption = fuel_consumption
@@ -234,55 +241,48 @@ elif st.session_state.page == "output":
 
     if vehicle_type == "Electric (EV)":
 
-        final_co2 = (
+        co2_per_km = (
             st.session_state.energy_consumption *
             st.session_state.grid_emission
         ) / 100
 
-        total_co2 = (final_co2 * distance) / 1000
-
-        st.success(f"Electric Vehicle CO₂: {final_co2:.2f} g/km")
-        st.info(f"Total CO₂ for {distance:.2f} km: {total_co2:.2f} kg")
-        st.info(f"Emission Status: {co2_status(final_co2)}")
+        total_co2 = (co2_per_km * distance) / 1000
 
         ice_val = 160
-        hybrid_val = final_co2 * 0.6
-        ev_val = final_co2
+        hybrid_val = co2_per_km * 0.6
+        ev_val = co2_per_km
 
     else:
-        ml_co2 = model.predict(
+        ml_pred = model.predict(
             np.array([[st.session_state.engine_size,
                        st.session_state.fuel_consumption]])
         )[0]
 
-        final_co2 = ml_co2 * FUEL_ADJUSTMENT[vehicle_type]
-        total_co2 = (final_co2 * distance) / 1000
+        co2_per_km = ml_pred * FUEL_ADJUSTMENT[vehicle_type]
+        total_co2 = (co2_per_km * distance) / 1000
 
-        st.success(f"{vehicle_type} Vehicle CO₂: {final_co2:.2f} g/km")
-        st.info(f"Total CO₂ for {distance:.2f} km: {total_co2:.2f} kg")
-        st.info(f"Emission Status: {co2_status(final_co2)}")
-
-        ice_val = final_co2
-        hybrid_val = final_co2 * 0.6
+        ice_val = co2_per_km
+        hybrid_val = co2_per_km * 0.6
         ev_val = 0
 
-    comparison_df = pd.DataFrame({
-        "Vehicle Type": ["ICE Vehicle", "Hybrid Vehicle", "Electric Vehicle"],
+    st.success(f"CO₂ Emission: {co2_per_km:.2f} g/km")
+    st.info(f"Total CO₂ for {distance} km: {total_co2:.2f} kg")
+    st.info(f"Emission Status: {co2_status(co2_per_km)}")
+
+    df = pd.DataFrame({
+        "Vehicle Type": ["ICE", "Hybrid", "Electric"],
         "CO₂ Emissions (g/km)": [ice_val, hybrid_val, ev_val]
     })
 
     st.subheader("Vehicle Emission Comparison")
-    st.dataframe(comparison_df)
+    st.dataframe(df)
 
-    # BAR GRAPH
-    plt.figure(figsize=(8, 4))
-    plt.bar(comparison_df["Vehicle Type"],
-            comparison_df["CO₂ Emissions (g/km)"])
+    plt.figure(figsize=(7, 4))
+    plt.bar(df["Vehicle Type"], df["CO₂ Emissions (g/km)"])
     st.pyplot(plt)
     plt.close()
 
-    # LINE GRAPH
-    plt.figure(figsize=(9, 4))
+    plt.figure(figsize=(8, 4))
     plt.plot(distances, ice_val * distances, label="ICE")
     plt.plot(distances, hybrid_val * distances, label="Hybrid")
     plt.plot(distances, ev_val * distances, label="EV")
@@ -293,9 +293,10 @@ elif st.session_state.page == "output":
     st.subheader("How to Reduce CO₂ Emissions")
     reduction_tips()
 
-    if st.button("⬅ Back to Input Page"):
+    if st.button("⬅ Back"):
         st.session_state.page = "input"
         st.rerun()
+
 
     
 
