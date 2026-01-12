@@ -81,16 +81,16 @@ if st.session_state.page == "input":
     st.session_state.distance = distance
 
     # ===============================
-    # ELECTRIC VEHICLE INPUT (WITH RANGES)
+    # ELECTRIC VEHICLE INPUT
     # ===============================
     if vehicle_type == "Electric (EV)":
 
-        st.subheader("Electric Vehicle Energy Details")
+        st.subheader("Electric Vehicle Parameters")
 
         st.info(
             "Typical EV ranges → "
             "Energy Consumption: 10–25 kWh/100 km | "
-            "Grid Emission: 300–900 g CO₂/kWh"
+            "Grid Emission Factor: 300–900 g CO₂/kWh"
         )
 
         energy_consumption = st.slider(
@@ -116,7 +116,7 @@ if st.session_state.page == "input":
     # ICE / CNG VEHICLE INPUT
     # ===============================
     else:
-        st.subheader("Vehicle Engine & Fuel Details")
+        st.subheader("Engine & Fuel Details")
 
         model_type = st.selectbox(
             "Vehicle Category",
@@ -124,7 +124,7 @@ if st.session_state.page == "input":
         )
 
         # -------------------------------
-        # BIKE SUB-MODELS
+        # BIKE MODELS
         # -------------------------------
         if model_type == "Bike":
 
@@ -133,22 +133,28 @@ if st.session_state.page == "input":
                 ["Commuter", "Cruiser", "Sports", "Scooter"]
             )
 
-            bike_engine_ranges = {
+            bike_engine = {
                 "Commuter": (0.10, 0.15),
                 "Cruiser": (0.25, 0.50),
                 "Sports": (0.20, 0.40),
                 "Scooter": (0.10, 0.13)
             }
 
-            bike_fuel_ranges = {
+            bike_fuel = {
                 "Commuter": (2.0, 3.0),
                 "Cruiser": (3.5, 5.0),
                 "Sports": (3.0, 4.5),
                 "Scooter": (1.8, 2.5)
             }
 
-            min_eng, max_eng = bike_engine_ranges[bike_type]
-            min_fc, max_fc = bike_fuel_ranges[bike_type]
+            min_eng, max_eng = bike_engine[bike_type]
+            min_fc, max_fc = bike_fuel[bike_type]
+
+            st.info(
+                f"{bike_type} Bike → "
+                f"Engine: {min_eng}-{max_eng} L | "
+                f"Fuel: {min_fc}-{max_fc} L/100 km"
+            )
 
             engine_size = st.slider(
                 "Engine Size (litres)",
@@ -167,7 +173,7 @@ if st.session_state.page == "input":
             )
 
         # -------------------------------
-        # CAR MODELS
+        # CAR MODELS (FIXED RANGE DISPLAY)
         # -------------------------------
         else:
             engine_ranges = {
@@ -184,6 +190,13 @@ if st.session_state.page == "input":
 
             min_eng, max_eng = engine_ranges[model_type]
             min_fc, max_fc = fuel_ranges[model_type]
+
+            # ✅ RANGE INFO (THIS WAS MISSING BEFORE)
+            st.info(
+                f"{model_type} typical ranges → "
+                f"Engine: {min_eng}-{max_eng} L | "
+                f"Fuel: {min_fc}-{max_fc} L/100 km"
+            )
 
             engine_size = st.slider(
                 "Engine Size (litres)",
@@ -219,9 +232,6 @@ elif st.session_state.page == "output":
     distance = st.session_state.distance
     distances = np.arange(1, int(distance) + 1)
 
-    # ===============================
-    # ELECTRIC VEHICLE
-    # ===============================
     if vehicle_type == "Electric (EV)":
 
         final_co2 = (
@@ -239,9 +249,6 @@ elif st.session_state.page == "output":
         hybrid_val = final_co2 * 0.6
         ev_val = final_co2
 
-    # ===============================
-    # ICE / CNG VEHICLE (ML)
-    # ===============================
     else:
         ml_co2 = model.predict(
             np.array([[st.session_state.engine_size,
@@ -251,9 +258,7 @@ elif st.session_state.page == "output":
         final_co2 = ml_co2 * FUEL_ADJUSTMENT[vehicle_type]
         total_co2 = (final_co2 * distance) / 1000
 
-        st.success(
-            f"{vehicle_type} Vehicle CO₂ (ML Predicted): {final_co2:.2f} g/km"
-        )
+        st.success(f"{vehicle_type} Vehicle CO₂: {final_co2:.2f} g/km")
         st.info(f"Total CO₂ for {distance:.2f} km: {total_co2:.2f} kg")
         st.info(f"Emission Status: {co2_status(final_co2)}")
 
@@ -261,9 +266,6 @@ elif st.session_state.page == "output":
         hybrid_val = final_co2 * 0.6
         ev_val = 0
 
-    # ===============================
-    # COMPARISON TABLE
-    # ===============================
     comparison_df = pd.DataFrame({
         "Vehicle Type": ["ICE Vehicle", "Hybrid Vehicle", "Electric Vehicle"],
         "CO₂ Emissions (g/km)": [ice_val, hybrid_val, ev_val]
@@ -272,55 +274,22 @@ elif st.session_state.page == "output":
     st.subheader("Vehicle Emission Comparison")
     st.dataframe(comparison_df)
 
-    # ===============================
     # BAR GRAPH
-    # ===============================
     plt.figure(figsize=(8, 4))
     plt.bar(comparison_df["Vehicle Type"],
             comparison_df["CO₂ Emissions (g/km)"])
-    plt.xlabel("Vehicle Type")
-    plt.ylabel("CO₂ Emissions (g/km)")
-    plt.title("CO₂ Emission Comparison")
     st.pyplot(plt)
     plt.close()
 
-    # ===============================
     # LINE GRAPH
-    # ===============================
     plt.figure(figsize=(9, 4))
-    plt.plot(distances, ice_val * distances, label="ICE Vehicle")
-    plt.plot(distances, hybrid_val * distances, label="Hybrid Vehicle")
-    plt.plot(distances, ev_val * distances, label="Electric Vehicle")
-    plt.xlabel("Distance (km)")
-    plt.ylabel("Total CO₂ Emissions (grams)")
-    plt.title("CO₂ Emission Trend vs Distance")
+    plt.plot(distances, ice_val * distances, label="ICE")
+    plt.plot(distances, hybrid_val * distances, label="Hybrid")
+    plt.plot(distances, ev_val * distances, label="EV")
     plt.legend()
-    plt.grid(True)
     st.pyplot(plt)
     plt.close()
 
-    # ===============================
-    # RECOMMENDATION
-    # ===============================
-    st.subheader("Recommended Vehicle Choice")
-
-    sorted_df = comparison_df.sort_values("CO₂ Emissions (g/km)")
-    best = sorted_df.iloc[0]
-    second = sorted_df.iloc[1]
-
-    st.success(
-        f"✅ Best Choice: {best['Vehicle Type']} "
-        f"({best['CO₂ Emissions (g/km)']:.2f} g/km)"
-    )
-
-    st.info(
-        f"ℹ️ Practical Alternative: {second['Vehicle Type']} "
-        f"({second['CO₂ Emissions (g/km)']:.2f} g/km)"
-    )
-
-    # ===============================
-    # TIPS
-    # ===============================
     st.subheader("How to Reduce CO₂ Emissions")
     reduction_tips()
 
