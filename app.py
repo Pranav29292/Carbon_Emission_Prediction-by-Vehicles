@@ -4,40 +4,24 @@ import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
 import warnings
-
 warnings.filterwarnings("ignore")
-
-# =================================================
 # APP CONFIG
-# =================================================
 st.set_page_config(
     page_title="Vehicle CO₂ Emission Prediction System",
     layout="wide"
 )
-
-# =================================================
 # LOAD TRAINED ML MODEL
-# =================================================
 model = joblib.load("vehicle_co2_model.pkl")
-
-# =================================================
 # FUEL ADJUSTMENT FACTORS
-# =================================================
 FUEL_ADJUSTMENT = {
     "Petrol": 1.00,
     "Diesel": 1.06,
     "CNG": 0.90
 }
-
-# =================================================
 # SESSION STATE
-# =================================================
 if "page" not in st.session_state:
     st.session_state.page = "input"
-
-# =================================================
 # HELPER FUNCTIONS
-# =================================================
 def co2_status(co2):
     if co2 <= 120:
         return "Safe (Low Emission)"
@@ -58,10 +42,7 @@ def reduction_tips():
     ]
     for tip in tips:
         st.write("•", tip)
-
-# =================================================
 # PAGE 1 : INPUT
-# =================================================
 if st.session_state.page == "input":
 
     st.title("🚗 Vehicle CO₂ Emission Prediction System")
@@ -115,9 +96,7 @@ if st.session_state.page == "input":
         st.session_state.page = "output"
         st.rerun()
 
-# =================================================
 # PAGE 2 : OUTPUT
-# =================================================
 elif st.session_state.page == "output":
 
     st.title("📊 Emission Analysis Results")
@@ -146,9 +125,7 @@ elif st.session_state.page == "output":
         hybrid_val = final_co2 * 0.6
         ev_val = final_co2
 
-    # =================================================
     # ICE VEHICLES (ML PREDICTED)
-    # =================================================
     else:
         ml_co2 = model.predict(
             np.array([[st.session_state.engine_size,
@@ -167,10 +144,8 @@ elif st.session_state.page == "output":
         ice_val = final_co2
         hybrid_val = final_co2 * 0.6
         ev_val = 0
-
-    # =================================================
+        
     # COMPARISON TABLE
-    # =================================================
     comparison_df = pd.DataFrame({
         "Vehicle Type": ["ICE Vehicle", "Hybrid Vehicle", "Electric Vehicle"],
         "CO₂ Emissions (g/km)": [ice_val, hybrid_val, ev_val]
@@ -178,10 +153,8 @@ elif st.session_state.page == "output":
 
     st.subheader("Vehicle Emission Comparison")
     st.dataframe(comparison_df)
-
-    # =================================================
+    
     # BAR GRAPH
-    # =================================================
     plt.figure(figsize=(8, 4))
     plt.bar(
         comparison_df["Vehicle Type"],
@@ -193,9 +166,7 @@ elif st.session_state.page == "output":
     st.pyplot(plt)
     plt.close()
 
-    # =================================================
     # LINE GRAPH
-    # =================================================
     plt.figure(figsize=(9, 4))
     plt.plot(distances, ice_val * distances, label="ICE Vehicle")
     plt.plot(distances, hybrid_val * distances, label="Hybrid Vehicle")
@@ -208,9 +179,7 @@ elif st.session_state.page == "output":
     st.pyplot(plt)
     plt.close()
 
-    # =================================================
     # RECOMMENDATION
-    # =================================================
     st.subheader("Recommended Vehicle Choice")
 
     sorted_df = comparison_df.sort_values("CO₂ Emissions (g/km)")
@@ -226,9 +195,7 @@ elif st.session_state.page == "output":
         f"({second['CO₂ Emissions (g/km)']:.2f} g/km)"
     )
 
-    # =================================================
     # TIPS
-    # =================================================
     st.subheader("How to Reduce CO₂ Emissions")
     reduction_tips()
 
