@@ -52,8 +52,8 @@ def reduction_tips():
         "Avoid sudden acceleration and braking",
         "Regular vehicle servicing",
         "Reduce unnecessary vehicle load",
-        "Use carpooling or public transport",
-        "Consider switching to Hybrid or Electric vehicles"
+        "Use public transport or carpooling",
+        "Prefer Hybrid or Electric vehicles"
     ]
     for tip in tips:
         st.write("•", tip)
@@ -80,7 +80,7 @@ if st.session_state.page == "input":
     st.session_state.distance = distance
 
     # ===============================
-    # ELECTRIC VEHICLE
+    # ELECTRIC VEHICLE INPUT
     # ===============================
     if fuel_type == "Electric (EV)":
 
@@ -98,7 +98,7 @@ if st.session_state.page == "input":
         st.session_state.grid_emission = grid_emission
 
     # ===============================
-    # ICE / CNG VEHICLES
+    # ICE / CNG VEHICLE INPUT
     # ===============================
     else:
         category = st.selectbox(
@@ -106,9 +106,6 @@ if st.session_state.page == "input":
             ["Two-Wheeler", "Four-Wheeler"]
         )
 
-        # ===============================
-        # TWO-WHEELER
-        # ===============================
         if category == "Two-Wheeler":
 
             model_type = st.selectbox(
@@ -130,11 +127,7 @@ if st.session_state.page == "input":
                 "Scooter": (1.8, 2.5)
             }
 
-        # ===============================
-        # FOUR-WHEELER (HATCHBACK / SEDAN / SUV)
-        # ===============================
         else:
-
             model_type = st.selectbox(
                 "Four-Wheeler Type",
                 ["Hatchback", "Sedan", "SUV"]
@@ -191,31 +184,37 @@ elif st.session_state.page == "output":
     distance = st.session_state.distance
     distances = np.arange(1, int(distance) + 1)
 
+    # ===============================
+    # ELECTRIC VEHICLE LOGIC
+    # ===============================
     if st.session_state.vehicle_type == "Electric (EV)":
 
-        co2_per_km = (
+        base_ev = (
             st.session_state.energy_consumption *
             st.session_state.grid_emission
         ) / 100
 
-        total_co2 = (co2_per_km * distance) / 1000
+        ice_val = base_ev * 2.5
+        hybrid_val = base_ev * 1.3
+        ev_val = base_ev * 0.4
 
-        ice_val = 160
-        hybrid_val = co2_per_km * 0.6
-        ev_val = co2_per_km
+        co2_per_km = ev_val
 
+    # ===============================
+    # ICE / CNG VEHICLE LOGIC
+    # ===============================
     else:
         ml_pred = model.predict(
             np.array([[st.session_state.engine_size,
                        st.session_state.fuel_consumption]])
         )[0]
 
-        co2_per_km = ml_pred * FUEL_ADJUSTMENT[st.session_state.vehicle_type]
-        total_co2 = (co2_per_km * distance) / 1000
-
-        ice_val = co2_per_km
-        hybrid_val = co2_per_km * 0.6
+        ice_val = ml_pred * FUEL_ADJUSTMENT[st.session_state.vehicle_type]
+        hybrid_val = ice_val * 0.6
         ev_val = 0
+        co2_per_km = ice_val
+
+    total_co2 = (co2_per_km * distance) / 1000
 
     st.success(f"CO₂ Emission: {co2_per_km:.2f} g/km")
     st.info(f"Total CO₂ for {distance} km: {total_co2:.2f} kg")
