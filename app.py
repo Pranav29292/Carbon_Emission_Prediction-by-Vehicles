@@ -5,38 +5,26 @@ import joblib
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
-
-# ===============================
 # APP CONFIG
-# ===============================
 st.set_page_config(
     page_title="Vehicle CO₂ Emission Prediction System",
     layout="wide"
 )
 
-# ===============================
 # LOAD TRAINED ML MODEL
-# ===============================
 model = joblib.load("vehicle_co2_model.pkl")
 
-# ===============================
 # FUEL ADJUSTMENT FACTORS
-# ===============================
 FUEL_ADJUSTMENT = {
     "Petrol": 1.00,
     "Diesel": 1.06,
     "CNG": 0.90
 }
-
-# ===============================
 # SESSION STATE
-# ===============================
 if "page" not in st.session_state:
     st.session_state.page = "input"
-
-# ===============================
+    
 # HELPER FUNCTIONS
-# ===============================
 def co2_status(co2):
     if co2 <= 120:
         return "Safe (Low Emission)"
@@ -58,9 +46,7 @@ def reduction_tips():
     for tip in tips:
         st.write("•", tip)
 
-# =================================================
 # PAGE 1 : INPUT
-# =================================================
 if st.session_state.page == "input":
 
     st.title("🚗 Vehicle CO₂ Emission Prediction System")
@@ -79,9 +65,7 @@ if st.session_state.page == "input":
     st.session_state.vehicle_type = fuel_type
     st.session_state.distance = distance
 
-    # ===============================
     # ELECTRIC VEHICLE INPUT
-    # ===============================
     if fuel_type == "Electric (EV)":
 
         energy_consumption = st.slider(
@@ -97,9 +81,7 @@ if st.session_state.page == "input":
         st.session_state.energy_consumption = energy_consumption
         st.session_state.grid_emission = grid_emission
 
-    # ===============================
     # ICE / CNG VEHICLE INPUT
-    # ===============================
     else:
         category = st.selectbox(
             "Vehicle Category",
@@ -173,10 +155,8 @@ if st.session_state.page == "input":
     if st.button("🔮 Predict Emissions"):
         st.session_state.page = "output"
         st.rerun()
-
-# =================================================
+        
 # PAGE 2 : OUTPUT
-# =================================================
 elif st.session_state.page == "output":
 
     st.title("📊 Emission Analysis Results")
@@ -184,9 +164,7 @@ elif st.session_state.page == "output":
     distance = st.session_state.distance
     distances = np.arange(1, int(distance) + 1)
 
-    # ===============================
     # ELECTRIC VEHICLE LOGIC
-    # ===============================
     if st.session_state.vehicle_type == "Electric (EV)":
 
         base_ev = (
@@ -200,9 +178,7 @@ elif st.session_state.page == "output":
 
         co2_per_km = ev_val
 
-    # ===============================
     # ICE / CNG VEHICLE LOGIC
-    # ===============================
     else:
         ml_pred = model.predict(
             np.array([[st.session_state.engine_size,
